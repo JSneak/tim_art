@@ -71,11 +71,11 @@ function draw() {
   }
 
   if (keyDown(UP_ARROW)) {
-    angle += .01;
+    angle += .001;
   }
 
   if (keyDown(DOWN_ARROW)) {
-    angle -= .01;
+    angle -= .001;
   }
 
   var c  = cos(angle);
