@@ -3,14 +3,19 @@ var color_y = 200
 var color_z = 250
 var speed = .99
 var Image
-var angle = 0.0;
+var angle = 1.57;
+var GRAVITY = 0.3;
 
-var ground;
-var ground_width = 50;
-var ground_height = 50;
-var numGround;
+
+var groundSprites;
+var GROUND_SPRITE_WIDTH = 50;
+var GROUND_SPRITE_HEIGHT = 50;
+var numGroundSprites;
+
 
 var bargoSprites;
+
+var player;
 
 
 function preload() {
@@ -22,18 +27,40 @@ function setup() {
     createCanvas(windowWidth, windowHeight);
     background(color_x, color_y, color_z);
 
-    ground = new Group();
-    numGround = width/ground_width+1
+    groundSprites = new Group();
 
-    for (var n = 0; n < numGround; n++) {
-      var groundSprite = createSprite(n*50, height-25, ground_width,ground_height);
-      ground.add(groundSprite);
+    numGroundSprites = width/GROUND_SPRITE_WIDTH+1;
+
+    for (var n = 0; n < numGroundSprites; n++) {
+        var groundSprite = createSprite(n*50, height-25, GROUND_SPRITE_WIDTH, GROUND_SPRITE_HEIGHT);
+        groundSprites.add(groundSprite);
     }
+    player = createSprite(100, height-75, 50, 50);
+
     bargoSprites = new Group();
+
 }
 
 function draw() {
   background(color_x, color_y, color_z);
+
+  player.velocity.y = player.velocity.y + GRAVITY;
+
+ if (groundSprites.overlap(player)) {
+     player.velocity.y = 0;
+     player.position.y = (height-50) - (player.height/2);
+ }
+
+  player.position.x = player.position.x + 5;
+  camera.position.x = player.position.x + (width/4);
+
+  var firstGroundSprite = groundSprites[0];
+  if (firstGroundSprite.position.x <= camera.position.x - (width/2 + firstGroundSprite.width/2)) {
+     groundSprites.remove(firstGroundSprite);
+     firstGroundSprite.position.x = firstGroundSprite.position.x + numGroundSprites*firstGroundSprite.width;
+     groundSprites.add(firstGroundSprite);
+  }
+
 
   if (keyDown(RIGHT_ARROW)) {
     speed -= .01
@@ -51,15 +78,21 @@ function draw() {
     angle -= .01;
   }
 
+  var c  = cos(angle);
+  rotate(c)
 
   if (random() > speed) {
-    var bargo = createSprite(random((width-50)-15), random(0, (height-50)-15), 30, 30);
+    var bargo = createSprite(camera.position.x + width, random(0, (height-50)-15), 30, 30);
     bargo.addImage(Image);
     bargoSprites.add(bargo);
   }
 
-  var c  = cos(angle);
-  rotate(c)
+  var firstBargo = bargoSprites[0];
+  if (bargoSprites.length > 0 && firstBargo.position.x <= camera.position.x - (width/2 + firstBargo.width/2)) {
+    removeSprite(firstBargo);
+  }
+
+
   drawSprites();
 
 }
